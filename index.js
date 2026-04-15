@@ -1,11 +1,16 @@
 const express = require('express');
-const { Document, Packer, Paragraph, TextRun, BorderStyle, WidthType, ShadingType } = require('docx');
+const { Document, Packer, Paragraph, TextRun, BorderStyle } = require('docx');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
 const BLAUW = "1B3A6B";
 const ROOD = "E8222A";
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
 
 function h1(text) {
   return new Paragraph({
@@ -85,12 +90,25 @@ app.post('/generate', async (req, res) => {
     });
 
     const buffer = await Packer.toBuffer(doc);
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', `attachment; filename="${onderzoekNaam || 'rapport'}.docx"`);
-    res.send(buffer);
+    const fileName = `${(onderzoekNaam || 'rapport').replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.docx`;
+    const filePath = path.join(UPLOAD_DIR, fileName);
+    fs.writeFileSync(filePath, buffer);
+
+    const baseUrl = process.env.BASE_URL || `https://express-hello-world-8h0x.onrender.com`;
+    const downloadUrl = `${baseUrl}/download/${fileName}`;
+
+    res.json({ success: true, downloadUrl, fileName });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get('/download/:fileName', (req, res) => {
+  const filePath = path.join(UPLOAD_DIR, req.params.fileName);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  res.setHeader('Content-Disposition', `attachment; filename="${req.params.fileName}"`);
+  res.send(fs.readFileSync(filePath));
 });
 
 app.get('/', (req, res) => res.send('Rinkel DOCX Service actief'));
