@@ -1,7 +1,7 @@
 {
-  "name": "rinkel-rapport-generator",
+  "name": "rinkel-rapport-server",
   "version": "1.0.0",
-  "description": "Genereert gestyled Word-rapporten op basis van Claude output",
+  "description": "Genereert Word-rapporten met Rinkel huisstijl vanuit Claude markdown",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
