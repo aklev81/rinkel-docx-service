@@ -1,12 +1,16 @@
 {
-  "name": "rinkel-docx-service",
+  "name": "rinkel-rapport-generator",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Genereert gestyled Word-rapporten op basis van Claude output",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "docx": "^8.5.0",
+    "docx": "^9.6.1",
     "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
